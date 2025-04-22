@@ -1,0 +1,68 @@
+Sets
+i   production sites    /Valais, Thurgau, Aargau/
+j   demand centers      /Basel, Zurich, Bern, Geneva/
+;
+
+parameters
+a(i)  capacity of production i in tons per day
+/ Valais    35
+  Thurgau   40
+  Aargau    20  /
+
+b(j)  demand at market j in in tons per day
+/ Basel     25
+  Zurich    30
+  Bern      15
+  Geneva    20  /
+;
+
+
+Table d(i,j)  distance in km
+            Basel   Zurich  Bern  Geneva
+Valais      300     300     150   100
+Thurgau     100     50      150   350
+Aargau      50      50      100   250
+;
+
+Table e(i,j) transport constraint on route
+            Basel   Zurich  Bern    Geneva
+Valais      100      10      100      100
+Thurgau     200     200     200     200
+Aargau      1000    1000    2000    2000
+
+
+Scalar
+f   transport costs in CHF per 100km   /0.5/
+c   production costs in CHF per unit   /1/
+*doesn't change anything
+;
+
+
+Variables
+X(i,j)  shipment quantities in tons
+Z       total transportation costs
+;
+
+Positive Variable X ;
+
+Equations
+cost        objective function
+supply(i)   observe supply limit at production site i
+demand(j)   satisfy demand at market j
+capacity(i,j)  capacity constraint on each route;
+;
+
+cost..        Z  =e=  sum((i,j), f/100*c* d(i,j)*X(i,j)) ;
+
+supply(i) ..    sum(j, X(i,j))  =l=  a(i) ;
+
+demand(j) ..    sum(i, X(i,j))  =g=  b(j) ;
+
+capacity(i,j) ..      X(i,j) =l= e(i,j) ;
+
+
+
+Model transport /all/ ;
+
+
+Solve transport using lp minimizing z ;
